@@ -7,18 +7,14 @@ class Vectorizer:
         self.model = SentenceTransformer(model_name)
 
     def vectorize_text(self, text: str):
-        print("Vectorizing text: " + text)
         return self.model.encode(text)
     
-    def chunk_text(self, text: str, chunk_size : int = 300):
-        print("Chunking text: " + text)
+    def chunk_text(self, text: str, chunk_size : int):
         words = text.split()
-        print("text size: " + str(len(words)))
         chunks = [' '.join(words[i:i+chunk_size]) for i in range(0, len(words), chunk_size)]
         return chunks
     
-    def vectorize_chunks(self, text: str, chunk_size : int = 100):
-        print("Vectorizing chunks: " + text)
+    def vectorize_chunks(self, text: str, chunk_size : int):
         chunks = self.chunk_text(text, chunk_size)
         embeddings = [self.vectorize_text(chunk) for chunk in chunks]
         return chunks, embeddings

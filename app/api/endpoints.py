@@ -6,9 +6,11 @@ router = APIRouter()
 
 @router.post("/text")
 async def add_text(text_input: TextInput):
-    if not SemanticSearch().store_text(text_input.text, text_input.session_id):
+    semantic_search = SemanticSearch()
+    result = semantic_search.store_text(text_input.text, text_input.session_id, text_input.chunk_size)
+    if not result[0]:
         raise HTTPException(status_code=500, detail="Error storing text")
-    return {"message": "Text stored successfully"}
+    return {"message": "Text stored successfully", "chunks": result[1]}
 
 @router.post("/search")
 async def search(query: SearchQuery):

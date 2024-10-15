@@ -6,27 +6,27 @@ class SemanticSearch:
     def __init__(self):
         pass
 
-    def store_text(self, text: str, session_id: str):
+    def store_text(self, text: str, session_id: str, chunk_size: int):
         """Stores the text by chunking and embedding it."""
-        print("Storing text")
         try:
             vectorizer = Vectorizer()
-            chunks, embeddings = vectorizer.vectorize_chunks(text)
+            chunks, embeddings = vectorizer.vectorize_chunks(text, chunk_size)
 
             db = DBUtils()
             db.store_chunk(session_id, chunks, embeddings)
-            return True
+            return (True, len(chunks))
         except Exception as e:
             print(e)
-            return False
+            return (False, 0)
 
     def search_text(self, query: str, session_id: str, limit: int = 3):
         """Searches for the most similar text chunks to the query."""
-        print("Searching text")
         try:
             db = DBUtils()
             chunks, embeddings = db.get_chunks(session_id)  # Retrieve stored chunks and embeddings
-            
+
+            if (len(chunks) == 0 or len(embedding) == 0):
+                return None
             similarity_scores = []
             vectorizer = Vectorizer()
             query_embedding = vectorizer.vectorize_text(query)  # Vectorize the query

@@ -12,7 +12,7 @@ app = FastAPI(
 # Include the API router from the app/api/endpoints.py file
 app.include_router(api_router)
 
-@app.get("/")
+@app.get("/healthcheck")
 async def root():
     """Root endpoint to check if the API is running."""
     return {"message": "Semantic Search API is running!"}
