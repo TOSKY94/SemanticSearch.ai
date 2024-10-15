@@ -6,10 +6,10 @@ import numpy as np
 
 class DBUtils:
     def __init__(self):
-        settings = get_settings() 
-        self.client = CosmosClient(settings.COSMOS_URI, settings.COSMOS_KEY)
-        self.database = self.client.get_database_client(settings.COSMOS_DATABASE)
-        self.container = self.database.get_container_client(settings.COSMOS_CONTAINER)
+        settings = get_settings()
+        self.client = CosmosClient(settings["COSMOS_URI"], settings["COSMOS_KEY"])
+        self.database = self.client.get_database_client(settings["COSMOS_DATABASE"])
+        self.container = self.database.get_container_client(settings["COSMOS_CONTAINER"])
 
     def store_chunk(self, session_id: str, chunks: list, embeddings: list):
         print("Storing chunks")
