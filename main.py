@@ -1,20 +1,29 @@
-from fastapi import FastAPI, HTTPException
-from semantic_search import SemanticSearch
-from models import TextInput, SearchQuery
 
-app = FastAPI()
+from fastapi import FastAPI
+from app.api.endpoints import router as api_router
 
-@app.post("/text")
-async def add_text(text_input: TextInput):
-    if not SemanticSearch().store_text(text_input.text, text_input.session_id):
-        raise HTTPException(status_code=500, detail="Error storing text")
-    return {"message": "Text stored successfully"}
+# Initialize FastAPI app
+app = FastAPI(
+    title="Semantic Search API",
+    description="An API for storing and retrieving text chunks using semantic search.",
+    version="1.0.0"
+)
+
+# Include the API router from the app/api/endpoints.py file
+app.include_router(api_router)
+
+@app.get("/")
+async def root():
+    """Root endpoint to check if the API is running."""
+    return {"message": "Semantic Search API is running!"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 
-@app.post("/search")
-async def search(query: SearchQuery):
-    results = SemanticSearch().search_text(query.query, query.session_id, query.limit)
-    if results is None:
-        raise HTTPException(status_code=404, detail="No results found")
-    return {"query": query.query, "top_results": results}
+
+
+
+
 

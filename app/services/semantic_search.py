@@ -1,6 +1,6 @@
 from scipy.spatial.distance import cosine
-from vectorizer import Vectorizer
-from db_utils import DBUtils
+from app.services.vectorizer import Vectorizer
+from app.services.db_utils import DBUtils
 
 class SemanticSearch:
     def __init__(self):

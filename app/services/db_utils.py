@@ -1,28 +1,21 @@
 from azure.cosmos import CosmosClient, PartitionKey
+from config.settings import get_settings
 import json
 import uuid
 import numpy as np 
 
 class DBUtils:
     def __init__(self):
-        with open("appsettings.json") as config:
-            config = json.load(config)
-            print("setting up db")
-            self.cosmos_uri = config["COSMOS_URI"]
-            self.cosmos_key = config["COSMOS_key"]
-            self.cosmos_database = config["COSMOS_DATABASE"]
-            self.cosmos_container = config["COSMOS_CONTAINER"]
-            self.client = CosmosClient(self.cosmos_uri, self.cosmos_key)
-            self.database = self.client.get_database_client(self.cosmos_database)
-            self.container = self.database.get_container_client(self.cosmos_container)
+        settings = get_settings() 
+        self.client = CosmosClient(settings.COSMOS_URI, settings.COSMOS_KEY)
+        self.database = self.client.get_database_client(settings.COSMOS_DATABASE)
+        self.container = self.database.get_container_client(settings.COSMOS_CONTAINER)
 
     def store_chunk(self, session_id: str, chunks: list, embeddings: list):
         print("Storing chunks")
         for i, chunk in enumerate(chunks):
             # Check if the embedding is a NumPy array and convert it to a list
-            embedding = embeddings[i]
-            if isinstance(embedding, np.ndarray):
-                embedding = embedding.tolist()
+            embedding = embeddings[i].tolist() if isinstance(embeddings[i], np.ndarray) else embeddings[i]
 
             item = {
                 'id': str(uuid.uuid4()),
@@ -31,7 +24,6 @@ class DBUtils:
                 'embedding': embedding  # Now it's a JSON-serializable list
             }
 
-            # Insert directly without using json.dumps (Cosmos SDK handles JSON encoding)
             self.container.upsert_item(item)
         print("completed!")
 
