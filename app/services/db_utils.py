@@ -9,10 +9,40 @@ logger = logging.getLogger(__name__)
 
 class DBUtils:
     def __init__(self):
-        logger.debug("setting up comos db")
-        self.client = CosmosClient(os.environ.get("COSMOS_URI"), os.environ.get("COSMOS_KEY"))
-        self.database = self.client.get_database_client(os.environ.get("COSMOS_DATABASE"))
-        self.container = self.database.get_container_client(os.environ.get("COSMOS_CONTAINER"))
+        logger.debug("Setting up Cosmos DB")
+        self.client = None
+        self.database = None
+        self.container = None
+        self.connection_error = None
+        self._setup_connection()
+
+    def _setup_connection(self):
+        try:
+            cosmos_uri = os.environ.get("COSMOS_URI")
+            cosmos_key = os.environ.get("COSMOS_KEY")
+            cosmos_database = os.environ.get("COSMOS_DATABASE")
+            cosmos_container = os.environ.get("COSMOS_CONTAINER")
+
+            if not all([cosmos_uri, cosmos_key, cosmos_database, cosmos_container]):
+                raise ValueError("One or more Cosmos DB environment variables are missing")
+
+            self.client = CosmosClient(cosmos_uri, cosmos_key)
+            self.database = self.client.get_database_client(cosmos_database)
+            self.container = self.database.get_container_client(cosmos_container)
+        except Exception as e:
+            self.connection_error = str(e)
+            logger.error(f"Error setting up Cosmos DB connection: {e}")
+
+    def db_health_check(self):
+        if self.connection_error:
+            return False, self.connection_error
+        
+        try:
+            list(self.container.read_all_items(max_item_count=1))
+            return True, "Connected successfully"
+        except Exception as e:
+            return False, str(e)
+    
 
     def store_chunk(self, session_id: str, chunks: list, embeddings: list):
         logger.debug("Storing chunks")
