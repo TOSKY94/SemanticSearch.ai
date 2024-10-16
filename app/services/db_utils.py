@@ -32,7 +32,7 @@ class DBUtils:
             logger.debug("Storing chunks completed!")
 
         except Exception as e:
-            logger.error(f"error occured: {e}")
+            logger.error(f"error occured:: {e}")
 
 
     def get_chunks(self, session_id: str):
@@ -48,4 +48,4 @@ class DBUtils:
             return chunks, embeddings
         
         except Exception as e:
-            logger.error(f"error occured: {e}")
+            logger.error(f"error occured:: {e}")

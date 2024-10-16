@@ -21,7 +21,7 @@ class SemanticSearch:
             return (True, len(chunks))
         
         except Exception as e:
-            logger.error(f"error occured: {e}")
+            logger.error(f"error occured:: {e}")
             return (False, 0)
 
     def search_text(self, query: str, session_id: str, limit: int = 3, base_similarity: float = 0.0):
@@ -52,5 +52,5 @@ class SemanticSearch:
             return results
 
         except Exception as e:
-            logger.error(f"error occured: {e}")
+            logger.error(f"error occured:: {e}")
             return None
