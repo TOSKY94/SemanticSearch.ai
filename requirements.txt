@@ -3,3 +3,6 @@ uvicorn
 azure-cosmos
 sentence-transformers
 scipy
+pytest
+httpx
+pytest-asyncio 
