@@ -24,7 +24,8 @@ class DBUtils:
             cosmos_container = os.environ.get("COSMOS_CONTAINER")
 
             if not all([cosmos_uri, cosmos_key, cosmos_database, cosmos_container]):
-                raise ValueError("One or more Cosmos DB environment variables are missing")
+                missing_vars = [var for var in ["COSMOS_URI", "COSMOS_KEY", "COSMOS_DATABASE", "COSMOS_CONTAINER"] if not os.environ.get(var)]
+                raise ValueError(f"Missing Cosmos DB environment variables: {', '.join(missing_vars)}")
 
             self.client = CosmosClient(cosmos_uri, cosmos_key)
             self.database = self.client.get_database_client(cosmos_database)
