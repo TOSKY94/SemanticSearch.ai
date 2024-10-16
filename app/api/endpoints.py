@@ -14,7 +14,9 @@ async def add_text(text_input: TextInput):
 
 @router.post("/search")
 async def search(query: SearchQuery):
-    results = SemanticSearch().search_text(query.query, query.session_id, query.limit)
-    if results is None:
+    semantic_search = SemanticSearch()
+    results = semantic_search.search_text(query.query, query.session_id, query.limit)
+    if not results:
         raise HTTPException(status_code=404, detail="No results found")
+    
     return {"query": query.query, "top_results": results}
