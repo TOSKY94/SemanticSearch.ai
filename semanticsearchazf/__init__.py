@@ -2,19 +2,26 @@ import azure.functions as func
 import json
 from app.models.models import SearchQuery, TextInput
 from app.services.semantic_search import SemanticSearch
+import logging
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    route = req.route_params.get('route')
+    try:
+        route = req.route_params.get('route')
+        logging.info(f"Route received: {route}")
+        
+        if route == 'text':
+            return handle_add_text(req)
+        elif route == 'search':
+            return handle_search(req)
+        elif route == 'healthcheck':
+            return func.HttpResponse('Semantic Search API is running!', status_code=200)
+        else:
+            return func.HttpResponse('Route not found', status_code=404)
+        
+    except Exception as e:
+        logging.error(f"Error in route handling: {str(e)}")
+        return func.HttpResponse('Internal Server Error', status_code=500)
     
-    if route == 'text':
-        return handle_add_text(req)
-    elif route == 'search':
-        return handle_search(req)
-    elif route == 'healthcheck':
-        return func.HttpResponse('Semantic Search API is running!', status_code=200)
-    else:
-        return func.HttpResponse('Route not found', status_code=404)
-
 def handle_add_text(req: func.HttpRequest) -> func.HttpResponse:
     try:
         req_body = req.get_json()
