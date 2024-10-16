@@ -1,5 +1,5 @@
 from azure.cosmos import CosmosClient, PartitionKey
-from config.settings import get_settings
+import os
 import logging
 import uuid
 import numpy as np 
@@ -10,10 +10,9 @@ logger = logging.getLogger(__name__)
 class DBUtils:
     def __init__(self):
         logger.debug("setting up comos db")
-        settings = get_settings()
-        self.client = CosmosClient(settings["COSMOS_URI"], settings["COSMOS_KEY"])
-        self.database = self.client.get_database_client(settings["COSMOS_DATABASE"])
-        self.container = self.database.get_container_client(settings["COSMOS_CONTAINER"])
+        self.client = CosmosClient(os.environ.get("COSMOS_URI"), os.environ.get("COSMOS_KEY"))
+        self.database = self.client.get_database_client(os.environ.get("COSMOS_DATABASE"))
+        self.container = self.database.get_container_client(os.environ.get("COSMOS_CONTAINER"))
 
     def store_chunk(self, session_id: str, chunks: list, embeddings: list):
         logger.debug("Storing chunks")
