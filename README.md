@@ -16,8 +16,16 @@ This project demonstrates how to build a scalable semantic search API using Pyth
 ```bash
 semantic-search-api/
 │
-├── SemanticSearchFunction/
-│   ├── __init__.py              # Main function code
+├── search_func/
+│   ├── __init__.py              # Search function code
+│   └── function.json            # Function configuration
+|
+├── text_func/
+│   ├── __init__.py              # Text function code
+│   └── function.json            # Function configuration
+|
+├── healthcheck/
+│   ├── __init__.py              # Healthcheck function code
 │   └── function.json            # Function configuration
 │
 ├── app/
