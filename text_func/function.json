@@ -6,11 +6,8 @@
         "type": "httpTrigger",
         "direction": "in",
         "name": "req",
-        "methods": [
-          "get",
-          "post"
-        ],
-        "route": "{route}"
+        "methods": ["post"],
+        "route": "text"
       },
       {
         "type": "http",
@@ -19,3 +16,4 @@
       }
     ]
   }
+  
