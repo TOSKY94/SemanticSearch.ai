@@ -9,3 +9,4 @@ class SearchQuery(BaseModel):
     session_id: str
     query: str
     limit: int = 10
+    base_similarity: float = 0.5

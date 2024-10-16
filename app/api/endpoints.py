@@ -15,7 +15,7 @@ async def add_text(text_input: TextInput):
 @router.post("/search")
 async def search(query: SearchQuery):
     semantic_search = SemanticSearch()
-    results = semantic_search.search_text(query.query, query.session_id, query.limit)
+    results = semantic_search.search_text(query.query, query.session_id, query.limit, query.base_similarity)
     if not results:
         raise HTTPException(status_code=404, detail="No results found")
     

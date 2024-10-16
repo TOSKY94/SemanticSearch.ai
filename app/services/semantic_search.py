@@ -24,7 +24,7 @@ class SemanticSearch:
             logger.error(f"error occured: {e}")
             return (False, 0)
 
-    def search_text(self, query: str, session_id: str, limit: int = 3):
+    def search_text(self, query: str, session_id: str, limit: int = 3, base_similarity: float = 0.0):
         """Searches for the most similar text chunks to the query."""
         try:
             db = DBUtils()
@@ -38,15 +38,16 @@ class SemanticSearch:
             query_embedding = vectorizer.vectorize_text(query)  
             
             for i, embedding in enumerate(embeddings):
-                similarity = cosine(query_embedding, embedding)
-                similarity_scores.append((i, similarity))
+                similarity = 1 - cosine(query_embedding, embedding)
+                if similarity >= base_similarity:
+                    similarity_scores.append((i, similarity))
 
-            similarity_scores.sort(key=lambda x: x[1])
+            similarity_scores.sort(key=lambda x: x[1], reverse = True)
 
             results = []
             for i in range(min(limit, len(similarity_scores))):
-                chunk_index = similarity_scores[i][0]
-                results.append(chunks[chunk_index])
+                chunk_index, score = similarity_scores[i]
+                results.append((chunks[chunk_index], score))
 
             return results
 
