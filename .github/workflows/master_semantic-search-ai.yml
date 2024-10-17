@@ -28,22 +28,24 @@ jobs:
           source venv/bin/activate
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       # Optional: Run tests here, if you have test cases in your project
       - name: Run tests
         run: pytest tests/
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          zip -r ../release.zip ./* -x "venv/*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,7 +57,7 @@ jobs:
           name: python-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip
+        run: unzip release.zip -d .
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -68,10 +70,16 @@ jobs:
         with:
           app-name: "semantic-search-ai"
           slot-name: "Production"
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: .
           scm-do-build-during-deployment: true
           enable-oryx-build: true
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2A8884E7846C47E5AABC73CE88763501 }}
+
+      - name: "Configure Azure Function App"
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az functionapp config appsettings set --name semantic-search-ai --resource-group <your-resource-group-name> --settings WEBSITE_RUN_FROM_PACKAGE=1 FUNCTIONS_WORKER_PROCESS_COUNT=1 PYTHON_ENABLE_WORKER_EXTENSIONS=1
 
       - name: Azure logout
         run: |
