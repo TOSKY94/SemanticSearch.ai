@@ -1,4 +1,5 @@
-azure_storage==0.37.0
+azure-cosmos
+azure-functions
 fitz==0.0.1.dev2
 numpy==1.24.3
 pydantic==2.9.2
