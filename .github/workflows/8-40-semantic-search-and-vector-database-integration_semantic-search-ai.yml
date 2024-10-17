@@ -70,6 +70,6 @@ jobs:
           app-name: 'semantic-search-ai'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_80C8207C8E10493E891785D5A810D67D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C544FE3906B5450792759A7097AD5331 }}
           scm-do-build-during-deployment: true
           enable-oryx-build: true
