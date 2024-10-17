@@ -2,6 +2,7 @@ import azure.functions as func
 import json
 from app.models.models import TextInput
 from app.services.semantic_search import SemanticSearch
+from app.models.models import Response
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -20,18 +21,36 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         success, chunks = semantic_search.store_text(text_input.text, text_input.session_id, text_input.chunk_size)
         
         if not success:
-            return func.HttpResponse(json.dumps({'error': 'Error storing text'}),
-                                     status_code=500, mimetype='application/json')
+            response_model = Response(
+                status="error",
+                message="Error storing text"
+            )
+            return func.HttpResponse(response_model.to_json(), status_code=500, mimetype='application/json')
         
         # Return success response
-        return func.HttpResponse(
-            json.dumps({"message": "Text stored successfully", "chunks": chunks}),
-            status_code=200,
-            mimetype='application/json'
+        response_model = Response(
+            status="success",
+            message="Text stored successfully",
+            data={"chunks_stored": chunks}
         )
+
+        return func.HttpResponse(response_model.to_json(), status_code=200, mimetype='application/json')
+    
     except ValueError:
-        return func.HttpResponse(json.dumps({'error': 'Invalid input'}),
-                                     status_code=400, mimetype='application/json')
+        response_model = Response(
+            status="error",
+            message="Invalid input",
+            error="Invalid input"
+        )
+
+        return func.HttpResponse(response_model.to_json(), status_code=400, mimetype='application/json')
+    
     except Exception as e:
         logging.error(f"Error in text storage: {str(e)}")
-        return func.HttpResponse(json.dumps({'error': str(e)}), status_code=500, mimetype='application/json')
+        response_model = Response(
+            status="error",
+            message="Text storage failed",
+            error=str(e)
+        )
+
+        return func.HttpResponse(response_model.to_json(), status_code=500, mimetype='application/json')

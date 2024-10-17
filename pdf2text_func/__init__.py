@@ -1,5 +1,6 @@
 import azure.functions as func
 from app.services.pdf_utils import PDFUtils
+from app.models.models import Response
 import json
 import logging
 import os
@@ -18,8 +19,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Check if it's a valid PDF file
         if uploaded_file.filename == '' or not uploaded_file.filename.endswith('.pdf'):
-            return func.HttpResponse(json.dumps({'error': 'Invalid file type. Only PDF is allowed.'}),
-                                     status_code=400, mimetype='application/json')
+            response_model = Response(
+                status="error",
+                message="Invalid file type",
+                error="Invalid file type. Only PDF is allowed."
+            )
+            return func.HttpResponse(response_model.to_json(), status_code=400, mimetype='application/json')
+
 
         # Use a temporary directory (recommended for Azure Functions)
         temp_dir = '/tmp' if os.name != 'nt' else os.getcwd()
@@ -32,12 +38,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         # Extract text from the PDF
         extracted_text = PDFUtils().extract_text_from_pdf(pdf_path)
 
-        return func.HttpResponse(json.dumps({'extracted_text': extracted_text}),
+        response_model = Response(
+            status="success",
+            message="Text extracted successfully",
+            data={"extracted_text": extracted_text}
+        )
+
+        return func.HttpResponse(response_model.to_json(),
                                  status_code=200, mimetype='application/json')
 
     except Exception as e:
         logging.error(f"Error in pdf2text functionality: {str(e)}")
-        return func.HttpResponse(json.dumps({'error': str(e)}), status_code=500, mimetype='application/json')
+        response_model = Response(
+            status="error",
+            message="PDF processing failed",
+            error=str(e)
+        )
+        return func.HttpResponse(response_model, status_code=500, mimetype='application/json')
 
     finally:
         # Remove the PDF file after processing
