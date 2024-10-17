@@ -7,7 +7,7 @@ name: Build and deploy Python project to Azure Function App - semantic-search-ai
 on:
   push:
     branches:
-      - 8-40-semantic-search-and-vector-database-integration
+      - master
   workflow_dispatch:
 
 env:
