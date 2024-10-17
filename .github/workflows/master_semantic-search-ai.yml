@@ -72,3 +72,4 @@ jobs:
           scm-do-build-during-deployment: true
           enable-oryx-build: true
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2A8884E7846C47E5AABC73CE88763501 }}
+        timeout-minutes: 10
