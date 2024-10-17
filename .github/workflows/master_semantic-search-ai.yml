@@ -87,6 +87,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: "Check for existing deployments"
+        run: |
+          az functionapp deployment list --name semantic-search-ai --resource-group DocuChat --query "[?status=='InProgress'].{id:id}" --output tsv | xargs -I {} az functionapp deployment delete --name semantic-search-ai --resource-group DocuChat --id {}
+
       - name: "Deploy to Azure Functions"
         uses: Azure/functions-action@v1
         id: deploy-to-function
@@ -99,6 +103,7 @@ jobs:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2A8884E7846C47E5AABC73CE88763501 }}
 
       - name: "Configure Azure Function App"
+        if: success()
         uses: azure/CLI@v1
         with:
           inlineScript: |
@@ -108,3 +113,11 @@ jobs:
         run: |
           az logout
         if: always()
+
+      - name: "Handle Deployment Failure"
+        if: failure()
+        run: |
+          echo "Deployment failed. Checking logs..."
+          az functionapp log tail --name semantic-search-ai --resource-group DocuChat
+          echo "Attempting to restart the Function App..."
+          az functionapp restart --name semantic-search-ai --resource-group DocuChat
