@@ -21,7 +21,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         results = semantic_search.search_text(query.query, query.session_id, query.limit, query.base_similarity)
         
         if not results:
-            return func.HttpResponse('No results found', status_code=404)
+            return func.HttpResponse(json.dumps({'error': 'No results found'}),
+                                     status_code=404, mimetype='application/json')
         
         # Return success response
         return func.HttpResponse(
@@ -30,7 +31,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             mimetype='application/json'
         )
     except ValueError:
-        return func.HttpResponse('Invalid input', status_code=400)
+        return func.HttpResponse(json.dumps({'error': 'Invalid input'}),
+                                     status_code=400, mimetype='application/json')
+    
     except Exception as e:
         logging.error(f"Error in search functionality: {str(e)}")
-        return func.HttpResponse('Internal Server Error', status_code=500)
+        return func.HttpResponse(json.dumps({'error': str(e)}), status_code=500, mimetype='application/json')
