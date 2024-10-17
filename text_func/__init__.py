@@ -20,7 +20,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         success, chunks = semantic_search.store_text(text_input.text, text_input.session_id, text_input.chunk_size)
         
         if not success:
-            return func.HttpResponse('Error storing text', status_code=500)
+            return func.HttpResponse(json.dumps({'error': 'Error storing text'}),
+                                     status_code=500, mimetype='application/json')
         
         # Return success response
         return func.HttpResponse(
@@ -29,7 +30,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             mimetype='application/json'
         )
     except ValueError:
-        return func.HttpResponse('Invalid input', status_code=400)
+        return func.HttpResponse(json.dumps({'error': 'Invalid input'}),
+                                     status_code=400, mimetype='application/json')
     except Exception as e:
         logging.error(f"Error in text storage: {str(e)}")
-        return func.HttpResponse('Internal Server Error', status_code=500)
+        return func.HttpResponse(json.dumps({'error': str(e)}), status_code=500, mimetype='application/json')
