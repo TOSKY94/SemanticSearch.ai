@@ -38,9 +38,11 @@ jobs:
 
       - name: Zip artifact for deployment
         run: |
-          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          zip -r ../release.zip ./* -x "venv/*"
-          ls -l ../release.zip
+          zip -r release.zip . -x "venv/*" "tests/*" "*.git*"
+          echo "Contents of current directory after zipping:"
+          ls -l
+          echo "Size of release.zip:"
+          du -h release.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -63,20 +65,22 @@ jobs:
         with:
           name: python-app
           path: .
-        continue-on-error: true
 
       - name: Check for artifact
         run: |
           if [ ! -f release.zip ]; then
             echo "Error: release.zip not found. Artifact download may have failed."
             exit 1
+          else
+            echo "release.zip found. Proceeding with deployment."
+            ls -l release.zip
           fi
 
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - name: Unzip artifact for deployment
-        run: unzip release.zip -d .
+        run: |
+          unzip release.zip -d function_app
+          echo "Contents of function_app directory:"
+          ls -R function_app
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -89,7 +93,7 @@ jobs:
         with:
           app-name: "semantic-search-ai"
           slot-name: "Production"
-          package: .
+          package: function_app
           scm-do-build-during-deployment: true
           enable-oryx-build: true
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2A8884E7846C47E5AABC73CE88763501 }}
