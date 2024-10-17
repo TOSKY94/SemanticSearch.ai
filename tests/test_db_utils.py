@@ -1,5 +1,5 @@
 from unittest import mock
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, patch
 from app.services.db_utils import DBUtils
 import numpy as np
 
@@ -7,6 +7,12 @@ sample_session_id = "test_session"
 sample_chunks = ["This is chunk 1", "This is chunk 2"]
 sample_embeddings = [np.array([0.1, 0.2, 0.3]), np.array([0.4, 0.5, 0.6])]
 
+@patch.dict('os.environ', {
+    'COSMOS_URI': 'mock_uri',
+    'COSMOS_KEY': 'mock_key',
+    'COSMOS_DATABASE': 'mock_db',
+    'COSMOS_CONTAINER': 'mock_container'
+})
 @patch('app.services.db_utils.CosmosClient')
 def test_store_chunk(mock_cosmos_client):
     
@@ -15,7 +21,6 @@ def test_store_chunk(mock_cosmos_client):
     mock_container = MagicMock()
     mock_cosmos_client.return_value.get_database_client.return_value = mock_db
     mock_db.get_container_client.return_value = mock_container
-    
 
     # Act
     db_utils = DBUtils()
@@ -33,6 +38,13 @@ def test_store_chunk(mock_cosmos_client):
         }
         mock_container.upsert_item.assert_any_call(expected_item)
 
+
+@patch.dict('os.environ', {
+    'COSMOS_URI': 'mock_uri',
+    'COSMOS_KEY': 'mock_key',
+    'COSMOS_DATABASE': 'mock_db',
+    'COSMOS_CONTAINER': 'mock_container'
+})
 @patch('app.services.db_utils.CosmosClient')
 def test_get_chunks(mock_cosmos_client):
     

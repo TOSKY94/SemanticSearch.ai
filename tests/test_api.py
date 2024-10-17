@@ -2,12 +2,15 @@ import pytest
 import json
 import azure.functions as func
 from unittest.mock import patch, MagicMock
-from semanticsearchazf import main
+from search_func import main as search_main
+from text_func import main as text_main
+from healthcheck_func import main as healthcheck_main
 
 @pytest.fixture
 def mock_req():
     return MagicMock(spec=func.HttpRequest)
 
+# Test for adding text successfully
 def test_add_text_success(mock_req):
     # Arrange
     mock_req.get_json.return_value = {
@@ -19,14 +22,15 @@ def test_add_text_success(mock_req):
 
     # Act
     with patch("app.services.semantic_search.SemanticSearch.store_text", return_value=(True, 2)):
-        response = main(mock_req)
+        response = text_main(mock_req)
 
     # Assert
     assert response.status_code == 200
-    body = json.loads(response.get_body())
+    body = json.loads(response.get_body().decode())
     assert body["message"] == "Text stored successfully"
     assert body["chunks"] == 2
 
+# Test for failing to add text
 def test_add_text_failure(mock_req):
     # Arrange
     mock_req.get_json.return_value = {
@@ -38,12 +42,13 @@ def test_add_text_failure(mock_req):
 
     # Act
     with patch("app.services.semantic_search.SemanticSearch.store_text", return_value=(False, None)):
-        response = main(mock_req)
+        response = text_main(mock_req)
 
     # Assert
     assert response.status_code == 500
     assert response.get_body().decode() == 'Error storing text'
 
+# Test for successful search
 def test_search_text_success(mock_req):
     # Arrange
     mock_req.get_json.return_value = {
@@ -55,14 +60,15 @@ def test_search_text_success(mock_req):
 
     # Act
     with patch("app.services.semantic_search.SemanticSearch.search_text", return_value=["chunk1", "chunk2"]):
-        response = main(mock_req)
+        response = search_main(mock_req)
 
     # Assert
     assert response.status_code == 200
-    body = json.loads(response.get_body())
+    body = json.loads(response.get_body().decode())
     assert body["query"] == "Sample query"
     assert len(body["top_results"]) == 2
 
+# Test for no search results
 def test_search_text_no_results(mock_req):
     # Arrange
     mock_req.get_json.return_value = {
@@ -74,30 +80,24 @@ def test_search_text_no_results(mock_req):
 
     # Act
     with patch("app.services.semantic_search.SemanticSearch.search_text", return_value=None):
-        response = main(mock_req)
+        response = search_main(mock_req)
 
     # Assert
     assert response.status_code == 404
     assert response.get_body().decode() == 'No results found'
 
+# Test for healthcheck route
 def test_healthcheck(mock_req):
     # Arrange
     mock_req.route_params = {"route": "healthcheck"}
 
     # Act
-    response = main(mock_req)
+    with patch("app.services.db_utils.DBUtils.db_health_check", return_value=(False, "Error setting up Cosmos DB connection: Missing Cosmos DB environment variables: COSMOS_URI, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER")):
+        response = healthcheck_main(mock_req)
 
     # Assert
     assert response.status_code == 200
-    assert response.get_body().decode() == 'Semantic Search API is running!'
+    body = json.loads(response.get_body().decode())
+    assert body["is_healthy"] == False
+    assert body["message"] == "Error setting up Cosmos DB connection: Missing Cosmos DB environment variables: COSMOS_URI, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER"
 
-def test_invalid_route(mock_req):
-    # Arrange
-    mock_req.route_params = {"route": "invalid"}
-
-    # Act
-    response = main(mock_req)
-
-    # Assert
-    assert response.status_code == 404
-    assert response.get_body().decode() == 'Route not found'
