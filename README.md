@@ -2,7 +2,12 @@
 
 ## Overview
 
-This project demonstrates how to build a scalable semantic search API using Python, FastAPI, Sentence Transformers for vectorization, and Azure Cosmos DB for storage. The API allows users to submit large bodies of text, break them into chunks, store the chunks with vector embeddings, and perform semantic search queries to retrieve the most relevant text chunks.
+This project demonstrates a scalable semantic search API using Python and Azure Functions. The API supports:
+
+- Chunking and vectorizing large bodies of text.
+- Storing the text chunks and their vector embeddings in Azure Cosmos DB.
+- Performing semantic search queries to retrieve the most relevant text chunks.
+- PDF-to-text extraction.
 
 ## Features
 
@@ -10,12 +15,17 @@ This project demonstrates how to build a scalable semantic search API using Pyth
 - Text Vectorization: Converts each chunk of text into vector embeddings using a pre-trained `SentenceTransformer`.
 - Cosmos DB Storage: Stores the text chunks and their embeddings in Azure Cosmos DB for scalable and persistent storage.
 - Semantic Search: Retrieves the most relevant text chunks using cosine similarity based on user queries.
+- PDF-to-Text Extraction: Upload a PDF file, extract its text, and use it for further processing.
 
 ## Project Structure
 
 ```bash
 semantic-search-api/
 │
+├── healthcheck_func/
+│   ├── __init__.py              # Healthcheck function code
+│   └── function.json            # Function configuration
+|
 ├── search_func/
 │   ├── __init__.py              # Search function code
 │   └── function.json            # Function configuration
@@ -24,19 +34,22 @@ semantic-search-api/
 │   ├── __init__.py              # Text function code
 │   └── function.json            # Function configuration
 |
-├── healthcheck/
-│   ├── __init__.py              # Healthcheck function code
+├── pdf2text_func/
+│   ├── __init__.py              # Pdf text extraction function code
 │   └── function.json            # Function configuration
 │
 ├── app/
-│   ├── api/
-│   │   └── endpoints.py         # API routes and endpoints
+│   ├── models/
+│   │   └── models.py            # model classes
 │   └── services/
+│       ├── pdf_utils.py         # Pdf extraction logic
+│       ├── semantic_search.py   # semantic search logic
 │       ├── vectorizer.py        # Vectorization logic
 │       └── db_utils.py          # Cosmos DB interactions
 │
 ├── tests/                      # Unit and integration tests
 │   ├── test_vectorizer.py
+│   ├── test_pdf_utils.py
 │   ├── test_db_utils.py
 │   └── test_api.py
 │
@@ -80,7 +93,7 @@ pip install -r requirements.txt
 
 3. Set Up Cosmos DB Credentials:
 
-- Open `config/app_settings.json` and provide your Cosmos DB connection details:
+- Open `local.settings.json` and provide your Cosmos DB connection details:
 
 ```
 {
@@ -91,20 +104,17 @@ pip install -r requirements.txt
 }
 ```
 
-## Running the API
+## Running the API Locally with Azure Functions Core Tools
 
-1. Start the FastAPI server using Uvicorn:
-
-```
-uvicorn main:app --reload
-```
-
-2. Access the API:
-
-- Visit the interactive API documentation (provided by FastAPI and Swagger) at:
+1. Install Azure Functions Core Tools.
+2. Start the function app:
 
 ```
-http://localhost:8000/docs
+func start
+```
+
+3. Access the API at `http://localhost:7071`:
+
 ```
 
 ## API Endpoints
@@ -116,20 +126,27 @@ http://localhost:8000/docs
 - Request Body:
 
 ```
+
 {
-  "session_id": "string",
-  "text": "string"
+"session_id": "string",
+"text": "string",
+"chunk_size": 300
 }
+
 ```
 
 - Response:
 
 ```
+
 {
-  "message": "Text added successfully",
-  "session_id": "string",
-  "chunks_stored": 10
+"status": "success",
+"message": "Text stored successfully",
+"data": {
+"chunks_stored": 10
 }
+}
+
 ```
 
 2. Search for Text
@@ -139,30 +156,74 @@ http://localhost:8000/docs
 - Request Body:
 
 ```
+
 {
-  "query": "string"
+"query": "string",
+"session_id": "string",
+"limit": 2,
+"base_similarity": 0.7
 }
+
 ```
 
 - Response:
 
 ```
+
 {
-  "query": "string",
-  "top_chunks": [
-    {
-      "text_id": "string",
-      "chunk": "string",
-      "similarity_score": 0.89
-    }
-  ]
+"status": "success",
+"message": "Search results returned successfully",
+"data": {
+"query": "string",
+"top_results": [
+{
+"chunk": "string",
+"similarity_score": 0.89
 }
+]
+}
+}
+
 ```
+
+3. PDF-to-Text Extraction
+
+- Endpoint: `POST /pdf2text`
+- Description: Uploads a PDF file, extracts the text from the PDF, and returns the extracted text.
+- Request: Upload a PDF file (multipart/form-data).
+- Response:
+
+```
+
+{
+"status": "success",
+"message": "Text extracted successfully",
+"data": {
+"extracted_text": "The extracted text from the PDF..."
+}
+}
+
+````
+
+4. Healthcheck
+
+- Endpoint: `GET /healthcheck`
+- Description: Checks if the API and Cosmos DB connection are functioning correctly.
+- Response:
+```bash
+{
+  "status": "success",
+  "message": "DB Health Check",
+  "data": {
+    "is_healthy": true
+  }
+}
+````
 
 ## Project Configuration
 
 - Cosmos DB Configuration:
-  - You can modify Cosmos DB connection settings in the `config/app_settings.json` file:
+  - You can modify Cosmos DB connection settings in the `local.settings.json` file:
   ```
   {
       "COSMOS_URI": "your-cosmos-db-uri",
@@ -195,17 +256,19 @@ pytest tests/
 3. Run Specific Test Files:
 
 ```
-pytest tests/test_api.py     # Run API tests
-pytest tests/test_vectorizer.py  # Run vectorizer tests
+pytest -v tests/test_api.py         # Run API tests
+pytest -v tests/test_vectorizer.py  # Run vectorizer tests
+pytest -v tests/test_db_utils.py    # Run db utility tests
+pytest -v tests/test_pdf_utils.py   # Run pdf utility tests
 ```
 
 ## Key Libraries Used
 
-- FastAPI: Fast web framework for building APIs.
-- Azure Cosmos DB SDK: For storing and retrieving text chunks and embeddings.
-- Sentence-Transformers: For generating embeddings from text using pre-trained models.
-- Scipy: For calculating cosine similarity between embeddings.
-- Pytest: For unit and integration testing.
+Azure Functions: Serverless functions for handling HTTP requests.
+Azure Cosmos DB SDK: For storing and retrieving text chunks and embeddings.
+Sentence-Transformers: Pre-trained models for generating embeddings from text.
+Scipy: For calculating cosine similarity between embeddings.
+Pytest: For unit and integration testing.
 
 ## Future Enhancements
 
