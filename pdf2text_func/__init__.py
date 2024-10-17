@@ -1,5 +1,5 @@
 import azure.functions as func
-from app.services.pdf_utils import extract_text_from_pdf
+from app.services.pdf_utils import PDFUtils
 import json
 import logging
 import os
@@ -30,7 +30,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             f.write(uploaded_file.read())
 
         # Extract text from the PDF
-        extracted_text = extract_text_from_pdf(pdf_path)
+        extracted_text = PDFUtils().extract_text_from_pdf(pdf_path)
 
         return func.HttpResponse(json.dumps({'extracted_text': extracted_text}),
                                  status_code=200, mimetype='application/json')
