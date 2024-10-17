@@ -35,12 +35,13 @@ def test_pdf2text_success(mock_remove, mock_extract_text, mock_req):
     # Assert
     assert response.status_code == 200
     body = json.loads(response.get_body().decode())
-    assert body["extracted_text"] == mock_extracted_text
+    assert body["status"] == "success"
+    assert body["message"] == "Text extracted successfully"
+    assert body["data"]["extracted_text"] == mock_extracted_text
 
 # Test for extracting text with invalid file type
-@patch('app.services.pdf_utils.PDFUtils.extract_text_from_pdf', return_value=mock_extracted_text)
 @patch('os.remove')
-def test_pdf2text_invalid_file_type(mock_remove, mock_extract_text, mock_req):
+def test_pdf2text_invalid_file_type(mock_remove, mock_req):
     # Arrange
     file_data = {'file': create_mock_pdf_file(filename="test.txt", content=b"This is a text file.")}
     mock_req.files = file_data
@@ -51,7 +52,9 @@ def test_pdf2text_invalid_file_type(mock_remove, mock_extract_text, mock_req):
     # Assert
     assert response.status_code == 400
     body = json.loads(response.get_body().decode())
-    assert body['error'] == 'Invalid file type. Only PDF is allowed.'
+    assert body["status"] == "error"
+    assert body["message"] == "Invalid file type"
+    assert body["error"] == "Invalid file type. Only PDF is allowed."
 
 # Test for pdf extraction error
 @patch('app.services.pdf_utils.PDFUtils.extract_text_from_pdf', side_effect=Exception("Failed to process PDF"))
@@ -67,8 +70,9 @@ def test_pdf2text_processing_error(mock_remove, mock_extract_text, mock_req):
     # Assert
     assert response.status_code == 500
     body = json.loads(response.get_body().decode())
-    assert 'error' in body
-    assert body['error'] == 'Failed to process PDF'
+    assert body["status"] == "error"
+    assert body["message"] == "PDF processing failed"
+    assert body["error"] == "Failed to process PDF"
 
 # Test for file deletion error
 @patch('os.remove', side_effect=Exception("Failed to delete file"))
@@ -84,8 +88,11 @@ def test_pdf2text_file_deletion_error(mock_extract_text, mock_remove, mock_req):
     # Assert
     assert response.status_code == 200
     body = json.loads(response.get_body().decode())
-    assert body["extracted_text"] == mock_extracted_text
+    assert body["status"] == "success"
+    assert body["message"] == "Text extracted successfully"
+    assert body["data"]["extracted_text"] == mock_extracted_text
     mock_remove.assert_called_once()
+
 # Test for adding text successfully
 def test_add_text_success(mock_req):
     # Arrange
@@ -103,8 +110,9 @@ def test_add_text_success(mock_req):
     # Assert
     assert response.status_code == 200
     body = json.loads(response.get_body().decode())
+    assert body["status"] == "success"
     assert body["message"] == "Text stored successfully"
-    assert body["chunks"] == 2
+    assert body["data"]["chunks_stored"] == 2
 
 # Test for failing to add text
 def test_add_text_failure(mock_req):
@@ -123,7 +131,8 @@ def test_add_text_failure(mock_req):
     # Assert
     assert response.status_code == 500
     body = json.loads(response.get_body().decode())
-    assert body['error'] == 'Error storing text'
+    assert body["status"] == "error"
+    assert body["message"] == "Error storing text"
 
 # Test for successful search
 def test_search_text_success(mock_req):
@@ -142,8 +151,9 @@ def test_search_text_success(mock_req):
     # Assert
     assert response.status_code == 200
     body = json.loads(response.get_body().decode())
-    assert body["query"] == "Sample query"
-    assert len(body["top_results"]) == 2
+    assert body["status"] == "success"
+    assert body["message"] == "Search results returned successfully"
+    assert len(body["data"]["top_results"]) == 2
 
 # Test for no search results
 def test_search_text_no_results(mock_req):
@@ -162,7 +172,9 @@ def test_search_text_no_results(mock_req):
     # Assert
     assert response.status_code == 404
     body = json.loads(response.get_body().decode())
-    assert body['error'] == 'No results found'
+    assert body["status"] == "error"
+    assert body["message"] == "No results found"
+    assert body["error"] == "No results found"
 
 # Test for healthcheck route
 def test_healthcheck(mock_req):
@@ -170,12 +182,12 @@ def test_healthcheck(mock_req):
     mock_req.route_params = {"route": "healthcheck"}
 
     # Act
-    with patch("app.services.db_utils.DBUtils.db_health_check", return_value=(False, "Error setting up Cosmos DB connection: Missing Cosmos DB environment variables: COSMOS_URI, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER")):
+    with patch("app.services.db_utils.DBUtils.db_health_check", return_value=(False, "Missing environment variables")):
         response = healthcheck_main(mock_req)
 
     # Assert
     assert response.status_code == 200
     body = json.loads(response.get_body().decode())
-    assert body["is_healthy"] == False
-    assert body["message"] == "Error setting up Cosmos DB connection: Missing Cosmos DB environment variables: COSMOS_URI, COSMOS_KEY, COSMOS_DATABASE, COSMOS_CONTAINER"
-
+    assert body["status"] == "error"
+    assert body["message"] == "DB Health Check Failed"
+    assert body["error"] == "Missing environment variables"

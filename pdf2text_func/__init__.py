@@ -54,7 +54,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             message="PDF processing failed",
             error=str(e)
         )
-        return func.HttpResponse(response_model, status_code=500, mimetype='application/json')
+        return func.HttpResponse(response_model.to_json(), status_code=500, mimetype='application/json')
 
     finally:
         # Remove the PDF file after processing
