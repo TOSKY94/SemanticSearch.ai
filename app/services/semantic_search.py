@@ -3,7 +3,7 @@ from app.services.vectorizer import Vectorizer
 from app.services.db_utils import DBUtils
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class SemanticSearch:
