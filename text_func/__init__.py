@@ -4,8 +4,11 @@ from app.models.models import TextInput
 from app.services.semantic_search import SemanticSearch
 import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
+        logging.info('processing and storing text embeddings')
         # Parse request body
         req_body = req.get_json()
         text_input = TextInput(**req_body)

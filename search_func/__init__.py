@@ -4,8 +4,12 @@ from app.models.models import SearchQuery
 from app.services.semantic_search import SemanticSearch
 import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+
 def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
+        logging.info('processing search query')
         # Parse request body
         req_body = req.get_json()
         query = SearchQuery(**req_body)
