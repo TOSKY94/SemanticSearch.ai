@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# VS Code
+.vscode/
+
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+local.settings.json
+
+# Python test files
+test_*.py
+*_test.py
+
+# Miscellaneous
+*.log
+.DS_Store
+Thumbs.db
+
+# Project specific (adjust as needed)
+*.md
+LICENSE

@@ -1,5 +1,10 @@
+azure-functions
 fastapi
-uvicorn
+pydantic
 azure-cosmos
-sentence-transformers
-scipy
+sentence-transformers==2.2.2
+scipy==1.11.3
+numpy==1.26.2
+pytest
+torch==2.4.1
+-f https://download.pytorch.org/whl/cpu.html  # Force CPU-only installation

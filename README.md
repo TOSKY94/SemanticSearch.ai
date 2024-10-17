@@ -16,25 +16,32 @@ This project demonstrates how to build a scalable semantic search API using Pyth
 ```bash
 semantic-search-api/
 │
+├── search_func/
+│   ├── __init__.py              # Search function code
+│   └── function.json            # Function configuration
+|
+├── text_func/
+│   ├── __init__.py              # Text function code
+│   └── function.json            # Function configuration
+|
+├── healthcheck/
+│   ├── __init__.py              # Healthcheck function code
+│   └── function.json            # Function configuration
+│
 ├── app/
 │   ├── api/
 │   │   └── endpoints.py         # API routes and endpoints
 │   └── services/
-│       ├── chunking.py          # Text chunking logic
 │       ├── vectorizer.py        # Vectorization logic
 │       └── db_utils.py          # Cosmos DB interactions
 │
-├── config/
-│   ├── settings.py              # Loads the app settings
-│   └── app_settings.json        # Stores Cosmos DB credentials
-│
 ├── tests/                      # Unit and integration tests
-│   ├── test_chunking.py
 │   ├── test_vectorizer.py
 │   ├── test_db_utils.py
 │   └── test_api.py
 │
-├── main.py                      # Entry point for FastAPI app
+├── local.settings.json          # Local settings (including Cosmos DB credentials)
+├── host.json                    # Host configuration
 ├── requirements.txt             # Project dependencies
 └── README.md                    # Project documentation
 ```
