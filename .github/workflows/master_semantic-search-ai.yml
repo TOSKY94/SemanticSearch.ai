@@ -1,4 +1,4 @@
-name: Build and deploy Python project to Azure Function App - semantic-search-ai
+name: Build and deploy AI Python project to Azure Function App - semantic-search-ai
 
 on:
   push:
@@ -46,6 +46,7 @@ jobs:
         with:
           name: python-app
           path: release.zip
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,6 +56,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
+          path: .
+
+      - name: Display structure of downloaded files
+        run: ls -R
 
       - name: Unzip artifact for deployment
         run: unzip release.zip -d .
