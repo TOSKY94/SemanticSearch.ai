@@ -40,6 +40,7 @@ jobs:
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           zip -r ../release.zip ./* -x "venv/*"
+          ls -l ../release.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -47,6 +48,11 @@ jobs:
           name: python-app
           path: release.zip
           retention-days: 1
+
+      - name: List artifacts
+        run: |
+          echo "Listing artifacts in the current directory:"
+          ls -R
 
   deploy:
     runs-on: ubuntu-latest
@@ -57,6 +63,14 @@ jobs:
         with:
           name: python-app
           path: .
+        continue-on-error: true
+
+      - name: Check for artifact
+        run: |
+          if [ ! -f release.zip ]; then
+            echo "Error: release.zip not found. Artifact download may have failed."
+            exit 1
+          fi
 
       - name: Display structure of downloaded files
         run: ls -R
