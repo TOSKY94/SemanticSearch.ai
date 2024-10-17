@@ -1,6 +1,8 @@
 azure-functions
 azure-cosmos
 sentence-transformers
-scipy
-numpy
+scipy==1.14.1
+numpy==2.1.2
 pytest
+torch==2.0.1+cpu     # CPU-only version of PyTorch
+-f https://download.pytorch.org/whl/cpu.html  # Force CPU-only installation
