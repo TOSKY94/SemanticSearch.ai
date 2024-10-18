@@ -115,8 +115,6 @@ func start
 
 3. Access the API at `http://localhost:7071`:
 
-```
-
 ## API Endpoints
 
 1. Add Text
@@ -126,27 +124,23 @@ func start
 - Request Body:
 
 ```
-
 {
 "session_id": "string",
 "text": "string",
 "chunk_size": 300
 }
-
 ```
 
 - Response:
 
 ```
-
 {
 "status": "success",
 "message": "Text stored successfully",
 "data": {
 "chunks_stored": 10
+  }
 }
-}
-
 ```
 
 2. Search for Text
@@ -156,34 +150,30 @@ func start
 - Request Body:
 
 ```
-
 {
 "query": "string",
 "session_id": "string",
 "limit": 2,
 "base_similarity": 0.7
 }
-
 ```
 
 - Response:
 
 ```
-
 {
 "status": "success",
 "message": "Search results returned successfully",
 "data": {
 "query": "string",
 "top_results": [
-{
-"chunk": "string",
-"similarity_score": 0.89
+      {
+        "chunk": "string",
+        "similarity_score": 0.89
+      }
+    ]
+  }
 }
-]
-}
-}
-
 ```
 
 3. PDF-to-Text Extraction
@@ -194,22 +184,21 @@ func start
 - Response:
 
 ```
-
 {
 "status": "success",
 "message": "Text extracted successfully",
 "data": {
-"extracted_text": "The extracted text from the PDF..."
+      "extracted_text": "The extracted text from the PDF..."
+    }
 }
-}
-
-````
+```
 
 4. Healthcheck
 
 - Endpoint: `GET /healthcheck`
 - Description: Checks if the API and Cosmos DB connection are functioning correctly.
 - Response:
+
 ```bash
 {
   "status": "success",
@@ -218,7 +207,7 @@ func start
     "is_healthy": true
   }
 }
-````
+```
 
 ## Project Configuration
 

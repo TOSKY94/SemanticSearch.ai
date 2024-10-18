@@ -80,3 +80,6 @@ funcignore
 .DS_Store
 Thumbs.db
 *.swp
+
+.python_packages
+*.pdf
