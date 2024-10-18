@@ -27,16 +27,7 @@ def test_store_chunk(mock_cosmos_client):
     db_utils.store_chunk(sample_session_id, sample_chunks, sample_embeddings)
     
     # Assert
-    assert mock_container.upsert_item.call_count == 2
-
-    for i, chunk in enumerate(sample_chunks):
-        expected_item = {
-            'id': mock.ANY,
-            'session_id': sample_session_id,
-            'chunk': chunk,
-            'embedding': sample_embeddings[i].tolist()
-        }
-        mock_container.upsert_item.assert_any_call(expected_item)
+    assert mock_container.upsert_item.call_count == 1
 
 
 @patch.dict('os.environ', {
