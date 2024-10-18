@@ -69,7 +69,7 @@ jobs:
         id: deploy-to-function
         with:
           app-name: "semantic-search-ai"
-          slot-name: "Stagging"
+          slot-name: "stagging"
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C2E04134078E4CE691235BE85678ECC1 }}
           scm-do-build-during-deployment: true
