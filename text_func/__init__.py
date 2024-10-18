@@ -23,7 +23,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not success:
             response_model = Response(
                 status="error",
-                message="Error storing text"
+                message="Error storing text",
+                error="Error storing text"
             )
             return func.HttpResponse(response_model.to_json(), status_code=500, mimetype='application/json')
         

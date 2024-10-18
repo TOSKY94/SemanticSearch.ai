@@ -17,12 +17,15 @@ class SemanticSearch:
             chunks, embeddings = vectorizer.vectorize_chunks(text, chunk_size)
 
             db = DBUtils()
-            db.store_chunk(session_id, chunks, embeddings)
+            success = db.store_chunk(session_id, chunks, embeddings)
+
+            if not success:
+                return (False, 0)
             return (True, len(chunks))
         
         except Exception as e:
             logger.error(f"error occured:: {e}")
-            return (False, 0)
+            raise e
 
     def search_text(self, query: str, session_id: str, limit: int = 3, base_similarity: float = 0.0):
         """Searches for the most similar text chunks to the query."""
@@ -53,4 +56,4 @@ class SemanticSearch:
 
         except Exception as e:
             logger.error(f"error occured:: {e}")
-            return None
+            raise e

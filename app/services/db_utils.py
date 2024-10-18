@@ -59,10 +59,12 @@ class DBUtils:
                 }
 
                 self.container.upsert_item(item)
+                return True
             logger.debug("Storing chunks completed!")
 
         except Exception as e:
             logger.error(f"error occured:: {e}")
+            raise e
 
 
     def get_chunks(self, session_id: str):
@@ -79,3 +81,4 @@ class DBUtils:
         
         except Exception as e:
             logger.error(f"error occured:: {e}")
+            raise e
