@@ -27,7 +27,7 @@ def test_store_chunk(mock_cosmos_client):
     db_utils.store_chunk(sample_session_id, sample_chunks, sample_embeddings)
     
     # Assert
-    assert mock_container.upsert_item.call_count == 1
+    assert mock_container.upsert_item.call_count == 2
 
 
 @patch.dict('os.environ', {

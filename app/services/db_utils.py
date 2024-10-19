@@ -4,7 +4,7 @@ import logging
 import uuid
 import numpy as np 
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
 
 class DBUtils:
@@ -59,8 +59,8 @@ class DBUtils:
                 }
 
                 self.container.upsert_item(item)
-                return True
-            logger.debug("Storing chunks completed!")
+                logger.debug(f"Storing chunk {i+1}/{len(chunks)}")  
+            return True
 
         except Exception as e:
             logger.error(f"error occured:: {e}")
